@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <ctime>
 
 using namespace std;
 
@@ -17,13 +18,15 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    srand(time(0));
+
     ofstream *log = nullptr;
     if (!log_name.empty()) {
-        log = new ofstream(log_name);
+        log = new ofstream (log_name);
     }
 
     Laby *laby = nullptr;
-    laby = new Laby(10, 10, log, &cout);
+    laby = new Laby (8, 8, log, &cout);
     laby->print();
 
     if (laby != nullptr) {

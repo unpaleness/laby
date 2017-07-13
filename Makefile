@@ -1,21 +1,29 @@
 CC         = g++
 CFLAGS     = -std=c++14 -c -O2 -Wall -Wextra
 LFLAGS     = -std=c++14 -O2 -Wall -Wextra
-SRC_DIR    = src
-OBJ_DIR    = obj
-SOURCES    = src/main.cpp \
-             src/laby.cpp
-OBJECTS    = $(SOURCES:src/%.cpp=obj/%.o)
+SRCDIR     = src
+OBJDIR     = obj
+SOURCES    = main.cpp \
+             laby.cpp
+OBJECTS    = $(SOURCES:%.cpp=$(OBJDIR)/%.o)
 EXECUTABLE = laby
 
 all: $(EXECUTABLE)
 
-$(OBJECTS): $(SOURCES)
-	$(CC) $(CFLAGS) $(@:obj/%.o=src/%.cpp) -o $@
-
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LFLAGS) $(OBJECTS) -o $@
 
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	$(CC) $(CFLAGS) $(@:$(OBJDIR)/%.o=$(SRCDIR)/%.cpp) -o $@
+
+$(OBJECTS): | $(OBJDIR)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+# $(OBJECTS): $(SOURCES)
+# 	$(CC) $(CFLAGS) $(@:obj/%.o=src/%.cpp) -o $@
+
 .PHONY: clean
 clean:
-	rm -rfv $(OBJECTS) $(EXECUTABLE)
+	rm -rfv $(OBJDIR) $(EXECUTABLE)

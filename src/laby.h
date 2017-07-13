@@ -6,8 +6,6 @@
 
 using namespace std;
 
-typedef unsigned short int us_int;
-
 class Laby {
 public:
     Laby();
@@ -17,15 +15,16 @@ public:
     int print(); // Outputs labyrinth
 
 private:
-    bool *walls_v     { nullptr }; // vertical walls
-    bool *walls_h     { nullptr }; // horizontal walls
-    int  x            { 0 };
-    int  y            { 0 };
+    bool **walls_v       { nullptr }; // vertical walls
+    bool **walls_h       { nullptr }; // horizontal walls
+    int  x               { 0 };
+    int  y               { 0 };
 
-    ofstream *log_stream;
-    ostream *main_stream;
+    ofstream *log_stream { nullptr };
+    ostream *main_stream { nullptr };
 
     int generate();
+    bool rand_bool();
 };
 
 #endif // _LABY_H_
