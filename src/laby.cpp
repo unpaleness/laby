@@ -13,6 +13,10 @@ Laby::Laby() {}
 Laby::Laby(int x, int y, ofstream *l, ostream *m) : x(x), y(y), log_stream(l), main_stream(m) {
     *log_stream << "Info: " << __FUNCTION__ << "(): constructing..." << endl;
     if (x > 0 && y > 0) {
+        // end.x = x - 1;
+        // end.y = y - 1;
+        // *main_stream << 1 << endl;
+        *main_stream << x << endl << y << endl;
         walls_v = new bool *[y];
         for (int i = 0; i < y; ++i) {
             walls_v[i] = new bool [x + 1];
@@ -21,8 +25,12 @@ Laby::Laby(int x, int y, ofstream *l, ostream *m) : x(x), y(y), log_stream(l), m
         for (int i = 0; i < y + 1; ++i) {
             walls_h[i] = new bool [x];
         }
+        // *main_stream << 2 << endl;
+        // *log_stream << "Info: " << __FUNCTION__ << "(): begin = (" << begin.x << ';' << begin.y << ')' << endl;
+        // *log_stream << "Info: " << __FUNCTION__ << "(): end = (" << end.x << ';' << end.y << ')' << endl;
         *log_stream << "Info: " << __FUNCTION__ << "(): construction complete" << endl;
         generate();
+        solve();
     } else {
         *log_stream << "Warning: " << __FUNCTION__ << "(): walls not initialized" << endl;
     }
@@ -261,6 +269,16 @@ int Laby::generate() {
         }
     }
     *log_stream << "Info: " << __FUNCTION__ << "(): generating complete" << endl;
+    return 0;
+}
+
+int Laby::solve() {
+    *log_stream << "Info: " << __FUNCTION__ << "(): solving..." << endl;
+    if (walls_v == nullptr || walls_h == nullptr) {
+        *log_stream << "Warning: " << __FUNCTION__ << "(): cannot solve, walls not initialized" << endl;
+        return 1;
+    }
+    *log_stream << "Info: " << __FUNCTION__ << "(): solving complete" << endl;
     return 0;
 }
 

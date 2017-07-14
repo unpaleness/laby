@@ -3,8 +3,14 @@
 
 #include <ostream>
 #include <fstream>
+#include <vector>
 
 using namespace std;
+
+// struct Cell {
+//     int x { 0 };
+//     int y { 0 };
+// };
 
 class Laby {
 public:
@@ -19,11 +25,14 @@ private:
     bool **walls_h       { nullptr }; // horizontal walls
     int  x               { 0 };
     int  y               { 0 };
+    // Cell begin           { 0, 0 };
+    // Cell end             { 0, 0 };
 
     ofstream *log_stream { nullptr };
     ostream *main_stream { nullptr };
 
     int generate();
+    int solve();
     bool rand_bool();
 };
 
