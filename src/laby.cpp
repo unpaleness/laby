@@ -55,34 +55,6 @@ int Laby::print() {
         *log_stream << "Warning: " << __FUNCTION__ << "(): walls not initialized" << endl;
         return 1;
     }
-    // for (int j = 0; j < y + 1; ++j) {
-    //     // Upper corners and upper borders
-    //     for (int i = 0; i < x; ++i) {
-    //         *main_stream << "\u2588";
-    //         if (walls_h[j][i]) {
-    //             *main_stream << "\u2588";
-    //         } else {
-    //             *main_stream << ' ';
-    //         }
-    //     }
-    //     // Right upper corner of the last cell in row
-    //     *main_stream << "\u2588";
-    //     *main_stream << endl;
-    //     if (j < y) {
-    //         // Left borders and cells itself (empty)
-    //         for (int i = 0; i < x + 1; ++i) {
-    //             if (i > 0) {
-    //                 *main_stream << ' ';
-    //             }
-    //             if (walls_v[j][i]) {
-    //                 *main_stream << "\u2588";
-    //             } else {
-    //                 *main_stream << ' ';
-    //             }
-    //         }
-    //         *main_stream << endl;
-    //     }
-    // }
     map <int, string> nodes;
     nodes[0]  = "\u250c"; // Left upper corner
     nodes[1]  = "\u2510"; // Right upper corner
