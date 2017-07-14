@@ -55,35 +55,132 @@ int Laby::print() {
         *log_stream << "Warning: " << __FUNCTION__ << "(): walls not initialized" << endl;
         return 1;
     }
-    for (int j = 0; j < y + 1; ++j) {
-        // Upper corners and upper borders
-        for (int i = 0; i < x; ++i) {
-            *main_stream << "\u2588";
-            if (walls_h[j][i]) {
-                *main_stream << "\u2588";
+    // for (int j = 0; j < y + 1; ++j) {
+    //     // Upper corners and upper borders
+    //     for (int i = 0; i < x; ++i) {
+    //         *main_stream << "\u2588";
+    //         if (walls_h[j][i]) {
+    //             *main_stream << "\u2588";
+    //         } else {
+    //             *main_stream << ' ';
+    //         }
+    //     }
+    //     // Right upper corner of the last cell in row
+    //     *main_stream << "\u2588";
+    //     *main_stream << endl;
+    //     if (j < y) {
+    //         // Left borders and cells itself (empty)
+    //         for (int i = 0; i < x + 1; ++i) {
+    //             if (i > 0) {
+    //                 *main_stream << ' ';
+    //             }
+    //             if (walls_v[j][i]) {
+    //                 *main_stream << "\u2588";
+    //             } else {
+    //                 *main_stream << ' ';
+    //             }
+    //         }
+    //         *main_stream << endl;
+    //     }
+    // }
+    map <int, string> nodes;
+    nodes[0]  = "\u250c"; // Left upper corner
+    nodes[1]  = "\u2510"; // Right upper corner
+    nodes[2]  = "\u2514"; // Left lower corner
+    nodes[3]  = "\u2518"; // Right lower corner
+    nodes[4]  = "\u251c"; // Left T-element
+    nodes[5]  = "\u2524"; // Right T-element
+    nodes[6]  = "\u252c"; // Upper T-element
+    nodes[7]  = "\u2534"; // Lower T-element
+    nodes[8]  = "\u253c"; // Cross
+    nodes[9]  = "\u2502"; // Vertical stick
+    nodes[10] = "\u2500"; // Horisontal stick
+    nodes[11] = "\u2575"; // Vertical upper half-stick
+    nodes[12] = "\u2577"; // Vertical lower half-stick
+    nodes[13] = "\u2574"; // Horisontal left half-stick
+    nodes[14] = "\u2576"; // Horisontal right half-stick
+    nodes[15] = " "; // Space
+    if (x < 2 || y < 2) {
+        *main_stream << nodes[0];
+        for (int i = 1; i < x - 1; ++i) {
+            *main_stream << nodes[10];
+        }
+        *main_stream << nodes[1] << endl;
+        for (int j = 1; j < y - 1; ++j) {
+            *main_stream << nodes[9] << nodes[9] << endl;
+        }
+        *main_stream << nodes[2];
+        for (int i = 1; i < x - 1; ++i) {
+            *main_stream << nodes[10];
+        }
+        *main_stream << nodes[3] << endl;
+    } else {
+        *main_stream << nodes[0];
+        for (int i = 1; i < x; ++i) {
+            if (walls_v[0][i]) {
+                *main_stream << nodes[6];
             } else {
-                *main_stream << ' ';
+                *main_stream << nodes[10];
             }
         }
-        // Right upper corner of the last cell in row
-        *main_stream << "\u2588";
-        *main_stream << endl;
-        if (j < y) {
-            // Left borders and cells itself (empty)
-            for (int i = 0; i < x + 1; ++i) {
-                if (i > 0) {
-                    *main_stream << ' ';
-                }
-                if (walls_v[j][i]) {
-                    *main_stream << "\u2588";
-                } else {
-                    *main_stream << ' ';
-                }
+        *main_stream << nodes[1] << endl;
+        for (int j = 1; j < y; ++j) {
+            if (walls_h[j][0]) {
+                *main_stream << nodes[4];
+            } else {
+                *main_stream << nodes[9];
             }
-            *main_stream << endl;
+            for (int i = 1; i < x; ++i) {
+                if (walls_v[j - 1][i] && walls_v[j][i] && walls_h[j][i - 1] && walls_h[j][i])
+                    *main_stream << nodes[8];
+                if (!walls_v[j - 1][i] && walls_v[j][i] && walls_h[j][i - 1] && walls_h[j][i])
+                    *main_stream << nodes[6];
+                if (walls_v[j - 1][i] && !walls_v[j][i] && walls_h[j][i - 1] && walls_h[j][i])
+                    *main_stream << nodes[7];
+                if (walls_v[j - 1][i] && walls_v[j][i] && !walls_h[j][i - 1] && walls_h[j][i])
+                    *main_stream << nodes[4];
+                if (walls_v[j - 1][i] && walls_v[j][i] && walls_h[j][i - 1] && !walls_h[j][i])
+                    *main_stream << nodes[5];
+                if (!walls_v[j - 1][i] && !walls_v[j][i] && walls_h[j][i - 1] && walls_h[j][i])
+                    *main_stream << nodes[10];
+                if (!walls_v[j - 1][i] && walls_v[j][i] && !walls_h[j][i - 1] && walls_h[j][i])
+                    *main_stream << nodes[0];
+                if (!walls_v[j - 1][i] && walls_v[j][i] && walls_h[j][i - 1] && !walls_h[j][i])
+                    *main_stream << nodes[1];
+                if (walls_v[j - 1][i] && !walls_v[j][i] && !walls_h[j][i - 1] && walls_h[j][i])
+                    *main_stream << nodes[2];
+                if (walls_v[j - 1][i] && !walls_v[j][i] && walls_h[j][i - 1] && !walls_h[j][i])
+                    *main_stream << nodes[3];
+                if (walls_v[j - 1][i] && walls_v[j][i] && !walls_h[j][i - 1] && !walls_h[j][i])
+                    *main_stream << nodes[9];
+                if (!walls_v[j - 1][i] && !walls_v[j][i] && !walls_h[j][i - 1] && walls_h[j][i])
+                    *main_stream << nodes[14];
+                if (!walls_v[j - 1][i] && !walls_v[j][i] && walls_h[j][i - 1] && !walls_h[j][i])
+                    *main_stream << nodes[13];
+                if (!walls_v[j - 1][i] && walls_v[j][i] && !walls_h[j][i - 1] && !walls_h[j][i])
+                    *main_stream << nodes[12];
+                if (walls_v[j - 1][i] && !walls_v[j][i] && !walls_h[j][i - 1] && !walls_h[j][i])
+                    *main_stream << nodes[11];
+                if (!walls_v[j - 1][i] && !walls_v[j][i] && !walls_h[j][i - 1] && !walls_h[j][i])
+                    *main_stream << nodes[15];
+            }
+            if (walls_h[j][x - 1]) {
+                *main_stream << nodes[5] << endl;
+            } else {
+                *main_stream << nodes[9] << endl;
+            }
         }
+        *main_stream << nodes[2];
+        for (int i = 1; i < x; ++i) {
+            if (walls_v[y - 1][i]) {
+                *main_stream << nodes[7];
+            } else {
+                *main_stream << nodes[10];
+            }
+        }
+        *main_stream << nodes[3] << endl;
     }
-    *log_stream << "Info: " << __FUNCTION__ << "(): printing complete" << endl;
+    *log_stream << "Info: " << __FUNCTION__ << "(): printing (" << x << 'x' << y << ") complete" << endl;
     return 0;
 }
 
