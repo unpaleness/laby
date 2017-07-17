@@ -26,4 +26,4 @@ $(OBJDIR):
 
 .PHONY: clean
 clean:
-	rm -rfv $(OBJDIR) $(EXECUTABLE)
+	rm -rfv $(EXECUTABLE)

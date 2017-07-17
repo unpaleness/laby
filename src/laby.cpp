@@ -13,10 +13,8 @@ Laby::Laby() {}
 Laby::Laby(int x, int y, ofstream *l, ostream *m) : x(x), y(y), log_stream(l), main_stream(m) {
     *log_stream << "Info: " << __FUNCTION__ << "(): constructing..." << endl;
     if (x > 0 && y > 0) {
-        // end.x = x - 1;
-        // end.y = y - 1;
-        // *main_stream << 1 << endl;
-        *main_stream << x << endl << y << endl;
+        end_cell.x = x - 1;
+        end_cell.y = y - 1;
         walls_v = new bool *[y];
         for (int i = 0; i < y; ++i) {
             walls_v[i] = new bool [x + 1];
@@ -25,9 +23,8 @@ Laby::Laby(int x, int y, ofstream *l, ostream *m) : x(x), y(y), log_stream(l), m
         for (int i = 0; i < y + 1; ++i) {
             walls_h[i] = new bool [x];
         }
-        // *main_stream << 2 << endl;
-        // *log_stream << "Info: " << __FUNCTION__ << "(): begin = (" << begin.x << ';' << begin.y << ')' << endl;
-        // *log_stream << "Info: " << __FUNCTION__ << "(): end = (" << end.x << ';' << end.y << ')' << endl;
+        *log_stream << "Info: " << __FUNCTION__ << "(): begin = (" << begin_cell.x << ';' << begin_cell.y << ')' << endl;
+        *log_stream << "Info: " << __FUNCTION__ << "(): end = (" << end_cell.x << ';' << end_cell.y << ')' << endl;
         *log_stream << "Info: " << __FUNCTION__ << "(): construction complete" << endl;
         generate();
         solve();
@@ -63,6 +60,36 @@ int Laby::print() {
         *log_stream << "Warning: " << __FUNCTION__ << "(): walls not initialized" << endl;
         return 1;
     }
+    // Unicode symbols for displaying path
+    string **cells = new string *[y];
+    for (int i = 0; i < y; ++i) {
+        cells[i] = new string [x];
+    }
+    for (int j = 0; j < y; ++j) {
+        for (int i = 0; i < x; ++i) {
+            cells[j][i] = ' ';
+        }
+    }
+    for (size_t i = 0; i < path.size(); ++i) {
+        if (i > 0) {
+            Cell runner { path[i - 1] };
+            while (runner != path[i]) {
+                if (runner.x < path[i].x) {
+                    ++runner.x;
+                } else if (runner.x > path[i].x) {
+                    --runner.x;
+                }
+                if (runner.y < path[i].y) {
+                    ++runner.y;
+                } else if (runner.y > path[i].y) {
+                    --runner.y;
+                }
+                cells[runner.y][runner.x] = "\u2022";
+            }
+        } else {
+            cells[path[i].y][path[i].x] = "\u2022";
+        }
+    }
     for (int j = 0; j < y + 1; ++j) {
         // Upper corners and upper borders
         for (int i = 0; i < x; ++i) {
@@ -80,7 +107,7 @@ int Laby::print() {
             // Left borders and cells itself (empty)
             for (int i = 0; i < x + 1; ++i) {
                 if (i > 0) {
-                    *main_stream << ' ';
+                    *main_stream << cells[j][i - 1];
                 }
                 if (walls_v[j][i]) {
                     *main_stream << "\u2588";
@@ -91,6 +118,10 @@ int Laby::print() {
             *main_stream << endl;
         }
     }
+    for (int i = 0; i < y; ++i) {
+        delete [] cells[i];
+    }
+    delete [] cells;
     *log_stream << "Info: " << __FUNCTION__ << "(): printing complete" << endl;
     return 0;
 }
@@ -278,6 +309,17 @@ int Laby::solve() {
         *log_stream << "Warning: " << __FUNCTION__ << "(): cannot solve, walls not initialized" << endl;
         return 1;
     }
+
+    path.push_back(begin_cell);
+    Cell runner { begin_cell };
+    int it;
+    for (it = 0; it < iter_limit; ++it) {
+
+    }
+    if (it >= iter_limit) {
+        *log_stream << "Warning: " << __FUNCTION__ << "(): path not found in " << it << " iterations" << endl;
+    }
+
     *log_stream << "Info: " << __FUNCTION__ << "(): solving complete" << endl;
     return 0;
 }

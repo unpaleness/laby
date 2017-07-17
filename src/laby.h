@@ -7,10 +7,20 @@
 
 using namespace std;
 
-// struct Cell {
-//     int x { 0 };
-//     int y { 0 };
-// };
+struct Cell {
+    Cell() {};
+    Cell(int x, int y) : x(x), y(y) {};
+    Cell(const Cell &c) : x(c.x), y(c.y) {};
+    ~Cell() {};
+    int x { 0 };
+    int y { 0 };
+    bool operator==(const Cell &c) {
+        return x == c.x && y == c.y;
+    }
+    bool operator!=(const Cell &c) {
+        return x != c.x || y != c.y;
+    }
+};
 
 class Laby {
 public:
@@ -25,8 +35,10 @@ private:
     bool **walls_h       { nullptr }; // horizontal walls
     int  x               { 0 };
     int  y               { 0 };
-    // Cell begin           { 0, 0 };
-    // Cell end             { 0, 0 };
+    int iter_limit       { 1000 };
+    Cell begin_cell;
+    Cell end_cell;
+    vector <Cell> path;
 
     ofstream *log_stream { nullptr };
     ostream *main_stream { nullptr };
