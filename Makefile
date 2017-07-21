@@ -21,9 +21,6 @@ $(OBJECTS): | $(OBJDIR)
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
-# $(OBJECTS): $(SOURCES)
-# 	$(CC) $(CFLAGS) $(@:obj/%.o=src/%.cpp) -o $@
-
 .PHONY: clean
 clean:
-	rm -rfv $(OBJDIR) $(EXECUTABLE)
+	rm -rfv $(OBJDIR)/*.o $(EXECUTABLE)
