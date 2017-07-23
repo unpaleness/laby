@@ -35,6 +35,8 @@ int main(int argc, char **argv) {
     Laby *laby = nullptr;
     laby = new Laby (x, y, log, &cout);
     laby->print();
+    laby->solve();
+    laby->print();
 
     if (laby != nullptr) {
         delete laby;

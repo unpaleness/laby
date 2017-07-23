@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <set>
-#include <map>
 
 #include "laby.h"
 
@@ -27,7 +26,6 @@ Laby::Laby(int x, int y, ofstream *l, ostream *m) : x(x), y(y), log_stream(l), m
         *log_stream << "Info: " << __FUNCTION__ << "(): end = (" << end_cell.x << ';' << end_cell.y << ')' << endl;
         *log_stream << "Info: " << __FUNCTION__ << "(): construction complete" << endl;
         generate();
-        solve();
     } else {
         *log_stream << "Warning: " << __FUNCTION__ << "(): walls not initialized" << endl;
     }
@@ -71,24 +69,13 @@ int Laby::print() {
         }
     }
     for (size_t i = 0; i < path.size(); ++i) {
-        if (i > 0) {
-            Cell runner { path[i - 1] };
-            while (runner != path[i]) {
-                if (runner.x < path[i].x) {
-                    ++runner.x;
-                } else if (runner.x > path[i].x) {
-                    --runner.x;
-                }
-                if (runner.y < path[i].y) {
-                    ++runner.y;
-                } else if (runner.y > path[i].y) {
-                    --runner.y;
-                }
-                cells[runner.y][runner.x] = "\u2022";
-            }
-        } else {
+        // if (i > 0) {
+        //         }
+        //         }
+        //     }
+        // } else {
             cells[path[i].y][path[i].x] = "\u2022";
-        }
+        // }
     }
     for (int j = 0; j < y + 1; ++j) {
         // Upper corners and upper borders
@@ -123,6 +110,99 @@ int Laby::print() {
     }
     delete [] cells;
     *log_stream << "Info: " << __FUNCTION__ << "(): printing complete" << endl;
+    return 0;
+}
+
+int Laby::solve() {
+    *log_stream << "Info: " << __FUNCTION__ << "(): solving..." << endl;
+    if (walls_v == nullptr || walls_h == nullptr) {
+        *log_stream << "Warning: " << __FUNCTION__ << "(): cannot solve, walls not initialized" << endl;
+        return 1;
+    }
+
+    path.push_back(begin_cell);
+    int it;
+    for (it = 0; it < iter_limit; ++it) {
+        // Check whether current cell is exit
+        if (path.back() == end_cell) {
+            break;
+        }
+        // Check current cell's walls
+        // Northern wall
+        if (walls_h[path.back().y][path.back().x]) {
+            path.back().sides[CellDir::north] = CellDirStatus::rejected;
+        }
+        // Eastern wall
+        if (walls_v[path.back().y][path.back().x + 1]) {
+            path.back().sides[CellDir::east] = CellDirStatus::rejected;
+        }
+        // Southern wall
+        if (walls_h[path.back().y + 1][path.back().x]) {
+            path.back().sides[CellDir::south] = CellDirStatus::rejected;
+        }
+        // Western wall
+        if (walls_v[path.back().y][path.back().x]) {
+            path.back().sides[CellDir::west] = CellDirStatus::rejected;
+        }
+        for (int i = 0; i < 4; ++i) {
+            *main_stream << path.back().x << ' ' << path.back().y << ' ' << i << ' ' << static_cast<short>(*path.back().array_sides[i]) << endl;
+        }
+        // Choose next direction to follow
+        path.back().active_dir = CellDir::undef;
+        for (int i = 0; i < dirs; ++i) {
+            if (*path.back().array_sides[i] == CellDirStatus::undef) {
+                path.back().active_dir = static_cast<CellDir>(i + 1);
+                break;
+            }
+        }
+        CellDir next_dir { path.back().active_dir };
+        *main_stream << "next dir: " << static_cast<short>(next_dir) << endl;
+        // If there are no one direction remains, fall back to previous cell
+        if (next_dir == CellDir::undef) {
+            if (path.empty()) {
+                *log_stream << "Warning: " << __FUNCTION__ << "(): path cycles, exit solving function" << endl;
+                break;
+            }
+            path.pop_back();
+            *main_stream << "dead end, deleting" << endl;
+            path.back().sides[path.back().active_dir] = CellDirStatus::rejected;
+            continue;
+        }
+        // Do one step in "next_dir" direction
+        path.push_back(path.back());
+        *main_stream << "making a copy" << endl;
+        *main_stream << "this cell:" << endl;
+        for (int i = 0; i < dirs; ++i) {
+            *main_stream << path[path.size() - 2].x << ' ' << path[path.size() - 2].y << ' ' << i << ' ' << static_cast<short>(*path[path.size() - 2].array_sides[i]) << endl;
+        }
+        path.back().sides[opposite_dir(next_dir)] = CellDirStatus::origin;
+        switch (next_dir) {
+            case CellDir::north:
+                --path.back().y;
+                break;
+            case CellDir::east:
+                ++path.back().x;
+                break;
+            case CellDir::south:
+                ++path.back().y;
+                break;
+            case CellDir::west:
+                --path.back().x;
+                break;
+            default:
+                break;
+        }
+        *main_stream << "new cell:" << endl;
+        for (int i = 0; i < dirs; ++i) {
+            *main_stream << path.back().x << ' ' << path.back().y << ' ' << i << ' ' << static_cast<short>(*path.back().array_sides[i]) << endl;
+        }
+        print();
+    }
+    if (it >= iter_limit) {
+        *log_stream << "Warning: " << __FUNCTION__ << "(): path not found in " << it << " iterations" << endl;
+    }
+
+    *log_stream << "Info: " << __FUNCTION__ << "(): solving complete" << endl;
     return 0;
 }
 
@@ -303,27 +383,21 @@ int Laby::generate() {
     return 0;
 }
 
-int Laby::solve() {
-    *log_stream << "Info: " << __FUNCTION__ << "(): solving..." << endl;
-    if (walls_v == nullptr || walls_h == nullptr) {
-        *log_stream << "Warning: " << __FUNCTION__ << "(): cannot solve, walls not initialized" << endl;
-        return 1;
-    }
-
-    path.push_back(begin_cell);
-    Cell runner { begin_cell };
-    int it;
-    for (it = 0; it < iter_limit; ++it) {
-
-    }
-    if (it >= iter_limit) {
-        *log_stream << "Warning: " << __FUNCTION__ << "(): path not found in " << it << " iterations" << endl;
-    }
-
-    *log_stream << "Info: " << __FUNCTION__ << "(): solving complete" << endl;
-    return 0;
-}
-
 bool Laby::rand_bool() {
     return rand() % 2 ? true : false;
+}
+
+CellDir Laby::opposite_dir(CellDir dir) {
+    switch (dir) {
+        case CellDir::north:
+            return CellDir::south;
+        case CellDir::east:
+            return CellDir::west;
+        case CellDir::south:
+            return CellDir::north;
+        case CellDir::west:
+            return CellDir::east;
+        default:
+            return CellDir::undef;
+    }
 }
