@@ -4,7 +4,8 @@ LFLAGS     = -std=c++14 -O2 -Wall -Wextra
 SRCDIR     = src
 OBJDIR     = obj
 SOURCES    = main.cpp \
-             laby.cpp
+             laby.cpp \
+             cell.cpp
 OBJECTS    = $(SOURCES:%.cpp=$(OBJDIR)/%.o)
 EXECUTABLE = laby
 

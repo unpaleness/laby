@@ -8,6 +8,8 @@ using namespace std;
 
 #include "laby.h"
 
+using namespace Labyrinth;
+
 int main(int argc, char **argv) {
     string name { argv[0] };
     string log_name { "laby.log" };
@@ -33,7 +35,7 @@ int main(int argc, char **argv) {
     }
 
     Laby *laby = nullptr;
-    laby = new Laby (x, y, log, &cout);
+    laby = new Laby (x, y, 1000000, log, &cout);
     laby->print();
     laby->solve();
     laby->print();

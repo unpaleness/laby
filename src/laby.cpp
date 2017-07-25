@@ -3,17 +3,19 @@
 
 #include "laby.h"
 
+using namespace Labyrinth;
+
 /****************\
 * PUBLIC METHODS *
 \****************/
 
 Laby::Laby() {}
 
-Laby::Laby(int x, int y, ofstream *l, ostream *m) : x(x), y(y), log_stream(l), main_stream(m) {
+Laby::Laby(int x, int y, int it, ofstream *l, ostream *m) : x(x), y(y), iter_limit(it), log_stream(l), main_stream(m) {
     *log_stream << "Info: " << __FUNCTION__ << "(): constructing..." << endl;
     if (x > 0 && y > 0) {
-        end_cell.x = x - 1;
-        end_cell.y = y - 1;
+        end_cell.set_x(x - 1);
+        end_cell.set_y(y - 1);
         walls_v = new bool *[y];
         for (int i = 0; i < y; ++i) {
             walls_v[i] = new bool [x + 1];
@@ -22,8 +24,8 @@ Laby::Laby(int x, int y, ofstream *l, ostream *m) : x(x), y(y), log_stream(l), m
         for (int i = 0; i < y + 1; ++i) {
             walls_h[i] = new bool [x];
         }
-        *log_stream << "Info: " << __FUNCTION__ << "(): begin = (" << begin_cell.x << ';' << begin_cell.y << ')' << endl;
-        *log_stream << "Info: " << __FUNCTION__ << "(): end = (" << end_cell.x << ';' << end_cell.y << ')' << endl;
+        *log_stream << "Info: " << __FUNCTION__ << "(): begin = (" << begin_cell.get_x() << ';' << begin_cell.get_y() << ')' << endl;
+        *log_stream << "Info: " << __FUNCTION__ << "(): end = (" << end_cell.get_x() << ';' << end_cell.get_y() << ')' << endl;
         *log_stream << "Info: " << __FUNCTION__ << "(): construction complete" << endl;
         generate();
     } else {
@@ -69,13 +71,7 @@ int Laby::print() {
         }
     }
     for (size_t i = 0; i < path.size(); ++i) {
-        // if (i > 0) {
-        //         }
-        //         }
-        //     }
-        // } else {
-            cells[path[i].y][path[i].x] = "\u2022";
-        // }
+        cells[path[i].get_y()][path[i].get_x()] = "\u2022";
     }
     for (int j = 0; j < y + 1; ++j) {
         // Upper corners and upper borders
@@ -129,34 +125,30 @@ int Laby::solve() {
         }
         // Check current cell's walls
         // Northern wall
-        if (walls_h[path.back().y][path.back().x]) {
-            path.back().sides[CellDir::north] = CellDirStatus::rejected;
+        if (walls_h[path.back().get_y()][path.back().get_x()]) {
+            path.back().set_sides(CellDir::north, CellDirStatus::rejected);
         }
         // Eastern wall
-        if (walls_v[path.back().y][path.back().x + 1]) {
-            path.back().sides[CellDir::east] = CellDirStatus::rejected;
+        if (walls_v[path.back().get_y()][path.back().get_x() + 1]) {
+            path.back().set_sides(CellDir::east, CellDirStatus::rejected);
         }
         // Southern wall
-        if (walls_h[path.back().y + 1][path.back().x]) {
-            path.back().sides[CellDir::south] = CellDirStatus::rejected;
+        if (walls_h[path.back().get_y() + 1][path.back().get_x()]) {
+            path.back().set_sides(CellDir::south, CellDirStatus::rejected);
         }
         // Western wall
-        if (walls_v[path.back().y][path.back().x]) {
-            path.back().sides[CellDir::west] = CellDirStatus::rejected;
-        }
-        for (int i = 0; i < 4; ++i) {
-            *main_stream << path.back().x << ' ' << path.back().y << ' ' << i << ' ' << static_cast<short>(*path.back().array_sides[i]) << endl;
+        if (walls_v[path.back().get_y()][path.back().get_x()]) {
+            path.back().set_sides(CellDir::west, CellDirStatus::rejected);
         }
         // Choose next direction to follow
-        path.back().active_dir = CellDir::undef;
+        path.back().set_active_dir(CellDir::undef);
         for (int i = 0; i < dirs; ++i) {
-            if (*path.back().array_sides[i] == CellDirStatus::undef) {
-                path.back().active_dir = static_cast<CellDir>(i + 1);
+            if (path.back().get_array_sides(i) == CellDirStatus::undef) {
+                path.back().set_active_dir(static_cast<CellDir>(i + 1));
                 break;
             }
         }
-        CellDir next_dir { path.back().active_dir };
-        *main_stream << "next dir: " << static_cast<short>(next_dir) << endl;
+        CellDir next_dir { path.back().get_active_dir() };
         // If there are no one direction remains, fall back to previous cell
         if (next_dir == CellDir::undef) {
             if (path.empty()) {
@@ -164,39 +156,29 @@ int Laby::solve() {
                 break;
             }
             path.pop_back();
-            *main_stream << "dead end, deleting" << endl;
-            path.back().sides[path.back().active_dir] = CellDirStatus::rejected;
+            path.back().set_sides(path.back().get_active_dir(), CellDirStatus::rejected);
             continue;
         }
         // Do one step in "next_dir" direction
         path.push_back(path.back());
-        *main_stream << "making a copy" << endl;
-        *main_stream << "this cell:" << endl;
-        for (int i = 0; i < dirs; ++i) {
-            *main_stream << path[path.size() - 2].x << ' ' << path[path.size() - 2].y << ' ' << i << ' ' << static_cast<short>(*path[path.size() - 2].array_sides[i]) << endl;
-        }
-        path.back().sides[opposite_dir(next_dir)] = CellDirStatus::origin;
+        path.back().reset_sides();
+        path.back().set_sides(opposite_dir(next_dir), CellDirStatus::origin);
         switch (next_dir) {
             case CellDir::north:
-                --path.back().y;
+                path.back().dec_y();
                 break;
             case CellDir::east:
-                ++path.back().x;
+                path.back().inc_x();
                 break;
             case CellDir::south:
-                ++path.back().y;
+                path.back().inc_y();
                 break;
             case CellDir::west:
-                --path.back().x;
+                path.back().dec_x();
                 break;
             default:
                 break;
         }
-        *main_stream << "new cell:" << endl;
-        for (int i = 0; i < dirs; ++i) {
-            *main_stream << path.back().x << ' ' << path.back().y << ' ' << i << ' ' << static_cast<short>(*path.back().array_sides[i]) << endl;
-        }
-        print();
     }
     if (it >= iter_limit) {
         *log_stream << "Warning: " << __FUNCTION__ << "(): path not found in " << it << " iterations" << endl;
