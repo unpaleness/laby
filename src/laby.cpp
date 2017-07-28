@@ -14,8 +14,10 @@ Laby::Laby() {}
 Laby::Laby(int x, int y, int it, ofstream *l, ostream *m) : x(x), y(y), iter_limit(it), log_stream(l), main_stream(m) {
     *log_stream << "Info: " << __FUNCTION__ << "(): constructing..." << endl;
     if (x > 0 && y > 0) {
-        end_cell.set_x(x - 1);
-        end_cell.set_y(y - 1);
+        begin_cell.set_x(rand() % x);
+        begin_cell.set_y(rand() % y);
+        end_cell.set_x(rand() % x);
+        end_cell.set_y(rand() % y);
         walls_v = new bool *[y];
         for (int i = 0; i < y; ++i) {
             walls_v[i] = new bool [x + 1];
@@ -61,47 +63,66 @@ int Laby::print() {
         return 1;
     }
     // Unicode symbols for displaying path
-    string **cells = new string *[y];
-    for (int i = 0; i < y; ++i) {
-        cells[i] = new string [x];
+    char   c_empty { ' ' };
+    string s_wall  { "\u2588" };
+    string s_path  { "\033[31m\u2588\033[0m" };
+    string s_temp;
+    // Set up matrix of numeric values of elements
+    short **cells = new short *[y * 2 + 1];
+    for (int i = 0; i < y * 2 + 1; ++i) {
+        cells[i] = new short [x * 2 + 1];
     }
-    for (int j = 0; j < y; ++j) {
-        for (int i = 0; i < x; ++i) {
-            cells[j][i] = ' ';
-        }
-    }
-    for (size_t i = 0; i < path.size(); ++i) {
-        cells[path[i].get_y()][path[i].get_x()] = "\u2022";
-    }
-    for (int j = 0; j < y + 1; ++j) {
-        // Upper corners and upper borders
-        for (int i = 0; i < x; ++i) {
-            *main_stream << "\u2588";
-            if (walls_h[j][i]) {
-                *main_stream << "\u2588";
+    // Set up empty and node elements
+    for (int j = 0; j < y * 2 + 1; ++j) {
+        for (int i = 0; i < x * 2 + 1; ++i) {
+            if ( j == 0 || i == 0 || j == y * 2 || i == x * 2 || ( !(j % 2) && !(i % 2) ) ) {
+                cells[j][i] = 1;
             } else {
-                *main_stream << ' ';
+                cells[j][i] = 0;
             }
-        }
-        // Right upper corner of the last cell in row
-        *main_stream << "\u2588";
-        *main_stream << endl;
-        if (j < y) {
-            // Left borders and cells itself (empty)
-            for (int i = 0; i < x + 1; ++i) {
-                if (i > 0) {
-                    *main_stream << cells[j][i - 1];
-                }
-                if (walls_v[j][i]) {
-                    *main_stream << "\u2588";
-                } else {
-                    *main_stream << ' ';
-                }
-            }
-            *main_stream << endl;
         }
     }
-    for (int i = 0; i < y; ++i) {
+    // Set up path elements
+    for (size_t i = 0; i < path.size(); ++i) {
+        cells[path[i].get_y() * 2 + 1][path[i].get_x() * 2 + 1] = 2;
+        if (i > 0) {
+            cells[path[i - 1].get_y() + path[i].get_y() + 1][path[i - 1].get_x() + path[i].get_x() + 1] = 2;
+        }
+    }
+    // Set up walls' elements
+    for (int j = 0; j < y + 1; ++j) {
+        for (int i = 0; i < x; ++i) {
+            if (walls_h[j][i]) {
+                cells[j * 2][i * 2 + 1] = 1;
+            }
+        }
+        if (j < y) {
+            for (int i = 0; i < x + 1; ++i) {
+                if (walls_v[j][i]) {
+                    cells[j * 2 + 1][i * 2] = 1;
+                }
+            }
+        }
+    }
+    // Output
+    for (int j = 0; j < y * 2 + 1; ++j) {
+        s_temp.clear();
+        for (int i = 0; i < x * 2 + 1; ++i) {
+            switch (cells[j][i]) {
+                case 2:
+                    s_temp += s_path;
+                    break;
+                case 1:
+                    s_temp += s_wall;
+                    break;
+                default:
+                    s_temp += c_empty;
+                    break;
+            }
+        }
+        *main_stream << s_temp << endl;
+    }
+    for (int i = 0; i < y * 2 + 1; ++i) {
         delete [] cells[i];
     }
     delete [] cells;
