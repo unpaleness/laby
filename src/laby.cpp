@@ -11,13 +11,27 @@ using namespace Labyrinth;
 
 Laby::Laby() {}
 
-Laby::Laby(int x, int y, int it, ofstream *l, ostream *m) : x(x), y(y), iter_limit(it), log_stream(l), main_stream(m) {
+Laby::Laby(
+    ofstream *l,
+    ostream *m,
+    int x,
+    int y,
+    int it,
+    int x1,
+    int y1,
+    int x2,
+    int y2
+) : x(x), y(y), iter_limit(it), log_stream(l), main_stream(m) {
     *log_stream << "Info: " << __FUNCTION__ << "(): constructing..." << endl;
     if (x > 0 && y > 0) {
-        begin_cell.set_x(rand() % x);
-        begin_cell.set_y(rand() % y);
-        end_cell.set_x(rand() % x);
-        end_cell.set_y(rand() % y);
+        // begin_cell.set_x(rand() % x);
+        // begin_cell.set_y(rand() % y);
+        // end_cell.set_x(rand() % x);
+        // end_cell.set_y(rand() % y);
+        begin_cell.set_x(x1);
+        begin_cell.set_y(y1);
+        end_cell.set_x(x2);
+        end_cell.set_y(y2);
         walls_v = new bool *[y];
         for (int i = 0; i < y; ++i) {
             walls_v[i] = new bool [x + 1];

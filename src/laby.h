@@ -15,7 +15,7 @@ namespace Labyrinth {
 class Laby {
 public:
     Laby();
-    Laby(int x, int y, int it, ofstream *l, ostream *m);
+    Laby(ofstream *l, ostream *m, int x, int y, int it, int x1, int y1, int x2, int y2);
     ~Laby();
 
     int print(); // Outputs labyrinth
